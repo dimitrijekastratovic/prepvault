@@ -34,6 +34,58 @@ def test_user():
     }
 
 @pytest.fixture
+def test_problem():
+    return {
+        "title": "Test Problem",
+        "description": "This is a test problem.",
+        "constraints": "1 <= n <= 1000",
+        "difficulty": "Easy",
+        "time_limit": 1000,
+        "memory_limit": 256,
+        "topic": "Array"
+    }
+
+@pytest.fixture
+def test_problem2():
+    return {
+        "title": "Test Problem 2",
+        "description": "This is another test problem.",
+        "constraints": "1 <= n <= 1000",
+        "difficulty": "Medium",
+        "time_limit": 2000,
+        "memory_limit": 512,
+        "topic": "String"
+    }
+
+def add_test_problem(title: str, description: str, constraints: str, difficulty: str, time_limit: int, memory_limit: int, topic: str):
+    from app.models.problem import Problem
+    from app.models.topic import Topic
+    from app.models.problem_topics import ProblemTopic
+
+    with Session(engine) as session:
+        problem = Problem(
+            title=title,
+            description=description,
+            constraints=constraints,
+            difficulty=difficulty,
+            time_limit=time_limit,
+            memory_limit=memory_limit
+        )
+        session.add(problem)
+        session.commit()
+        session.refresh(problem)
+
+        topic = Topic(name=topic)
+        session.add(topic)
+        session.commit()
+        session.refresh(topic)
+
+        problem_topic = ProblemTopic(problem_id=problem.id, topic_id=topic.id)
+        session.add(problem_topic)
+        session.commit()
+        session.refresh(problem_topic)
+
+@pytest.fixture
 def client():
     return TestClient(app)
 

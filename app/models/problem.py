@@ -3,9 +3,9 @@ from typing import Optional
 from enum import Enum
 
 class Difficulty(str, Enum):
-    easy = "easy"
-    medium = "medium"
-    hard = "hard"
+    easy = "Easy"
+    medium = "Medium"
+    hard = "Hard"
 
 class Problem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

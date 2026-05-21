@@ -42,7 +42,8 @@ def test_problem():
         "difficulty": "Easy",
         "time_limit": 1000,
         "memory_limit": 256,
-        "topic": "Array"
+        "topics": ["Array"],
+        "test_cases": [{"input": "1\n2 3 4\n5", "expected_output": "0 1"}]
     }
 
 @pytest.fixture
@@ -54,13 +55,15 @@ def test_problem2():
         "difficulty": "Medium",
         "time_limit": 2000,
         "memory_limit": 512,
-        "topic": "String"
+        "topics": ["String"],
+        "test_cases": [{"input": "6\n7 8 9\n10", "expected_output": "2 3"}]
     }
 
-def add_test_problem(title: str, description: str, constraints: str, difficulty: str, time_limit: int, memory_limit: int, topic: str):
+def add_test_problem(title: str, description: str, constraints: str, difficulty: str, time_limit: int, memory_limit: int, topics: list[str], test_cases: list[dict]) -> int:
     from app.models.problem import Problem
     from app.models.topic import Topic
     from app.models.problem_topics import ProblemTopic
+    from app.models.test_case import ProblemTestCase
 
     with Session(engine) as session:
         problem = Problem(
@@ -75,15 +78,28 @@ def add_test_problem(title: str, description: str, constraints: str, difficulty:
         session.commit()
         session.refresh(problem)
 
-        topic = Topic(name=topic)
-        session.add(topic)
-        session.commit()
-        session.refresh(topic)
+        for topic_name in topics:
+            topic = Topic(name=topic_name)
+            session.add(topic)
+            session.commit()
+            session.refresh(topic)
 
-        problem_topic = ProblemTopic(problem_id=problem.id, topic_id=topic.id)
-        session.add(problem_topic)
-        session.commit()
-        session.refresh(problem_topic)
+            problem_topic = ProblemTopic(problem_id=problem.id, topic_id=topic.id)
+            session.add(problem_topic)
+            session.commit()
+            session.refresh(problem_topic)
+
+        for test_case in test_cases:
+            problem_test_case = ProblemTestCase(
+                problem_id=problem.id,
+                input=test_case["input"],
+                expected_output=test_case["expected_output"]
+            )
+            session.add(problem_test_case)
+            session.commit()
+            session.refresh(problem_test_case)
+
+        return problem.id
 
 @pytest.fixture
 def client():

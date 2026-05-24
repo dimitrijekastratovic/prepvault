@@ -1,0 +1,69 @@
+name: ADR (Architecture Decision Record)
+description: Document a non-trivial architectural decision
+title: "[ADR] "
+labels: ["adr", "documentation"]
+body:
+  - type: input
+    id: adr_number
+    attributes:
+      label: ADR number
+      description: Next sequential number. Check docs/adr/ for the highest existing number.
+      placeholder: "0001"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What is the problem we are trying to solve? What constraints exist?
+      placeholder: |
+        e.g. We need to execute user-submitted code safely. Options exist along a
+        spectrum from "use a hosted SaaS" to "build our own sandbox." This decision
+        affects infra complexity, cost, and ~30-50h of upcoming work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+      description: List each option with pros and cons.
+      value: |
+        ### Option 1:
+        **Pros:**
+        -
+        **Cons:**
+        -
+
+        ### Option 2:
+        **Pros:**
+        -
+        **Cons:**
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: Which option, and the core reasoning in 2-3 sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences
+      description: What does this decision unlock, lock us into, or make harder later?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tasks
+    attributes:
+      label: Follow-up
+      options:
+        - label: ADR file created at `docs/adr/NNNN-slug.md`
+        - label: Linked from README or relevant code

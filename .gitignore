@@ -222,3 +222,7 @@ __marimo__/
 
 #Mac specific
 .DS_Store
+
+# Node
+node_modules/
+playground/dist/

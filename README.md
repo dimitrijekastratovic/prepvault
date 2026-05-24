@@ -173,4 +173,4 @@ See [docs/adr/](docs/adr/) for the decision log.
 
 ## License
 
-TBD.
+[MIT](LICENSE)

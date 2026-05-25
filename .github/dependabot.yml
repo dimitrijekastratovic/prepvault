@@ -45,6 +45,11 @@ updates:
     labels:
       - "dependencies"
       - "docker"
+    # Python runtime major bumps are an architectural decision — see docs/adr/0001-python-version-policy.md.
+    # Patch and minor bumps (e.g. 3.12.4 → 3.12.5) are still auto-PR'd.
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions workflow dependencies
   - package-ecosystem: "github-actions"

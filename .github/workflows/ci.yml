@@ -12,15 +12,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Set up python
-        uses: actions/setup-python@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
         with:
-          python-version: "3.10"
+          enable-cache: true
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        # --frozen ensures CI uses the exact versions in uv.lock; fails if the lock is stale.
+        run: uv sync --frozen
+
       - name: Run ruff
-        run: ruff check .
+        run: uv run ruff check .
+
       - name: Run tests
-        run: pytest
+        run: uv run pytest
+
       - name: Build Docker image
-        run: docker build -t interview-prep .
+        run: docker build -t prepvault .

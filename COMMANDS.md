@@ -26,50 +26,72 @@ docker compose logs -f app
 docker ps
 ```
 
+## Dependencies (uv)
+
+PrepVault uses [uv](https://docs.astral.sh/uv/) for Python dependency management — see [ADR-0002](docs/adr/0002-dependency-management-with-uv.md).
+
+```bash
+# Install all deps (runtime + dev) into .venv from uv.lock
+uv sync
+
+# Install runtime deps only (what production / Docker does)
+uv sync --no-dev
+
+# Add a runtime dependency
+uv add fastapi
+
+# Add a dev dependency
+uv add --dev pytest
+
+# Refresh the lockfile to newest compatible versions
+uv lock --upgrade
+
+# Run any command inside the project venv (no manual activation needed)
+uv run <cmd>
+```
+
 ## Tests
 
 ```bash
 # Run all tests
-.venv/bin/python3 -m pytest
+uv run pytest
 
 # Run a specific test file
-.venv/bin/python3 -m pytest tests/test_auth.py
+uv run pytest tests/test_auth.py
 
 # Run with verbose output
-.venv/bin/python3 -m pytest -v
+uv run pytest -v
 
 # Run a specific test by name
-.venv/bin/python3 -m pytest -k "test_login"
+uv run pytest -k "test_login"
 ```
 
 ## Seeding the Database
 
 ```bash
 # Run seed script (DB container must be running, app container not required)
-DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep .venv/bin/python3 -m app.seeds.seed
+DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep uv run python -m app.seeds.seed
 ```
 
 ## Linting
 
 ```bash
 # Run ruff linter
-.venv/bin/python3 -m ruff check .
+uv run ruff check .
 
 # Auto-fix lint issues
-.venv/bin/python3 -m ruff check . --fix
+uv run ruff check . --fix
 ```
 
 ## Local Dev (without Docker)
 
 ```bash
-# Activate virtual environment
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# First-time setup: install uv, then sync deps
+brew install uv     # macOS; see uv docs for other platforms
+uv sync
 
 # Run FastAPI app locally (DB must be running via Docker)
-DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep .venv/bin/uvicorn app.main:app --reload
+DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep uv run uvicorn app.main:app --reload
 ```
 
 ## Git

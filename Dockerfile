@@ -1,21 +1,29 @@
-# Use an official Python runtime as a parent image
-# '-slim' variants are smaller and faster to build
+# Production image for PrepVault FastAPI backend.
+# Dependencies are managed by uv — see docs/adr/0002-dependency-management-with-uv.md.
+
 FROM python:3.10-slim
 
-# Set the working directory in the container
+# Install uv by copying its binary from the official distroless image.
+# This avoids needing curl/pip on the runtime image and gives us a pinned uv version.
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
-# Copy only the requirements file first to leverage Docker cache
-COPY requirements.txt .
+# Copy only the files needed to resolve dependencies first, so the install layer
+# is cached and only rebuilt when pyproject.toml or uv.lock changes.
+COPY pyproject.toml uv.lock ./
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# --frozen   : fail if uv.lock is out of sync with pyproject.toml (no implicit resolution in prod)
+# --no-dev   : skip the [dependency-groups.dev] group (no pytest/ruff in the image)
+# --no-install-project : we're not installing PrepVault itself as a package, only its deps
+RUN uv sync --frozen --no-dev --no-install-project
 
-# Copy the rest of the application code into the container
+# Copy the rest of the application code.
 COPY . .
 
-# Expose the port your app runs on (e.g., 8000 for FastAPI/Django, 5000 for Flask)
+# Put the project venv first on PATH so `uvicorn` resolves to the locked version.
+ENV PATH="/app/.venv/bin:$PATH"
+
 EXPOSE 8000
 
-# Define the command to run your app
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]

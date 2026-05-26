@@ -22,5 +22,6 @@ ADRs are numbered sequentially (`0001`, `0002`, ...) and named with a kebab-case
 | # | Title | Status |
 |---|---|---|
 | [0001](0001-python-version-policy.md) | Standardize on Python 3.12 and require ADRs for major version bumps | Accepted |
+| [0002](0002-dependency-management-with-uv.md) | Adopt uv for Python dependency management | Accepted |
 
 ADRs are added as decisions are made — see [ROADMAP.md](../../ROADMAP.md) for upcoming phases that will require ADRs.

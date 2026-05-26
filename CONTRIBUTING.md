@@ -45,14 +45,33 @@ docker compose up --build -d
 
 ---
 
+## Python dependencies
+
+PrepVault uses [`uv`](https://docs.astral.sh/uv/) for Python dependency management — see [ADR-0002](docs/adr/0002-dependency-management-with-uv.md).
+
+Install uv once: `brew install uv` (macOS) or follow the [official install guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+Common commands:
+
+```bash
+uv sync                 # install all deps (runtime + dev) into .venv
+uv sync --no-dev        # runtime deps only (what production does)
+uv add <pkg>            # add a runtime dependency
+uv add --dev <pkg>      # add a dev dependency
+uv run <cmd>            # run a command inside the project venv
+uv lock --upgrade       # refresh uv.lock to newest compatible versions
+```
+
+`pyproject.toml` declares direct deps; `uv.lock` pins the full resolved graph. Both are committed. Don't edit `uv.lock` by hand.
+
 ## Running tests
 
 ```bash
 # Backend tests
-pytest
+uv run pytest
 
 # Linting
-ruff check .
+uv run ruff check .
 ```
 
 End-to-end and frontend tests are planned for Phase 5.7 — see [ROADMAP.md](ROADMAP.md).

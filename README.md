@@ -105,7 +105,7 @@ The Vite dev server runs on [http://localhost:5173](http://localhost:5173) and p
 
 ```bash
 DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep \
-  .venv/bin/python3 -m app.seeds.seed
+  uv run python -m app.seeds.seed
 ```
 
 See [COMMANDS.md](COMMANDS.md) for the full development cheat sheet.

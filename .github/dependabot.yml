@@ -3,8 +3,11 @@
 
 version: 2
 updates:
-  # Python dependencies (FastAPI backend)
-  - package-ecosystem: "pip"
+  # Python dependencies (FastAPI backend) — managed by uv.
+  # See docs/adr/0002-dependency-management-with-uv.md.
+  # Dependabot resolves the whole graph atomically against uv.lock, so the
+  # mismatched-peer-pin failures we saw under pip can't recur.
+  - package-ecosystem: "uv"
     directory: "/"
     schedule:
       interval: "weekly"

@@ -15,9 +15,6 @@ Closes #
 - [ ] Integration tests added / updated
 - [ ] Manual verification (describe below)
 
-## Out of scope
-<!-- What was intentionally NOT done in this PR. -->
-
 ## Screenshots / recordings
 <!-- For UI changes. Delete if not applicable. -->
 

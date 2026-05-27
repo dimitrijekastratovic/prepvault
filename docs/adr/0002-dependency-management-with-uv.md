@@ -74,9 +74,3 @@ Concretely:
 - The repo now depends on a single-vendor tool (Astral). Mitigation: `uv.lock` and `pyproject.toml` are both portable formats — migration off uv would be mechanical, not a rewrite.
 - `uv` is younger than pip and pip-tools; some edge-case bug reports may be sparse. The core resolver is mature enough for production use as of 2026.
 - Existing CONTRIBUTING / README references to `pip install` must be updated.
-
-**Follow-up actions:**
-- Migrate `requirements.txt` → `pyproject.toml` + `uv.lock` (this branch)
-- Update `Dockerfile`, `.github/workflows/ci.yml`, `.github/dependabot.yml` (this branch)
-- Update `CONTRIBUTING.md` with the new workflow (this branch)
-- Address the CI/container Python version drift noted in [ADR-0001](0001-python-version-policy.md) — still out of scope here, but the `uv` migration makes the eventual fix simpler.

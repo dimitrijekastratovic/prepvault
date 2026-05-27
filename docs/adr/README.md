@@ -8,20 +8,21 @@ Code shows *what* was built. ADRs show *why*. They prevent re-litigating settled
 
 ## Format
 
-Each ADR follows a lightweight template:
+Each ADR is short and decision-focused:
 
-- **Context** — the problem and constraints
-- **Options considered** — with pros and cons
-- **Decision** — the chosen option and core reasoning
-- **Consequences** — what this unlocks, locks in, or makes harder
+- **Context** — the problem, the constraints, and what triggered the decision *now*
+- **Options** — a comparison table, not paragraph-per-option
+- **Decision** — the chosen option and the load-bearing reasoning (2–3 sentences)
+- **Consequences** — what this unlocks, locks in, or makes harder (bullets)
 
-ADRs are numbered sequentially (`0001`, `0002`, ...) and named with a kebab-case slug describing the decision (e.g. `0001-code-execution.md`).
+Target one screen of rendered markdown. ADRs are numbered sequentially (`0001`, `0002`, ...) and named with a kebab-case slug (e.g. `0003-code-execution.md`).
 
 ## Index
 
-| # | Title | Status |
-|---|---|---|
-| [0001](0001-python-version-policy.md) | Standardize on Python 3.12 and require ADRs for major version bumps | Accepted |
-| [0002](0002-dependency-management-with-uv.md) | Adopt uv for Python dependency management | Accepted |
+| # | Title |
+|---|---|
+| [0001](0001-python-version-policy.md) | Standardize on Python 3.12 and require ADRs for major version bumps |
+| [0002](0002-dependency-management-with-uv.md) | Adopt uv for Python dependency management |
+| [0003](0003-code-execution.md) | Self-hosted Judge0 for code execution |
 
 ADRs are added as decisions are made — see [ROADMAP.md](../../ROADMAP.md) for upcoming phases that will require ADRs.

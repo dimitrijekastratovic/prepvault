@@ -16,32 +16,25 @@ body:
       required: true
 
   - type: textarea
+    id: work
+    attributes:
+      label: What needs to be done
+      description: The concrete work for this ticket. A checklist or short prose.
+      placeholder: |
+        - Define `CodeExecutionService` protocol in `app/services/code_execution.py`
+        - Implement `Judge0CodeExecutionService` against the existing Judge0 client
+        - Wire the service into the submission router via FastAPI dependency injection
+    validations:
+      required: true
+
+  - type: textarea
     id: acceptance
     attributes:
       label: Acceptance criteria
-      description: Specific, testable outcomes. Use checkboxes.
+      description: How we know it's done. Testable outcomes, not the work itself.
       value: |
         - [ ]
         - [ ] Tests written and passing
         - [ ] Docs / ADR updated if applicable
     validations:
       required: true
-
-  - type: textarea
-    id: out_of_scope
-    attributes:
-      label: Out of scope
-      description: What is explicitly NOT in this ticket. Prevents scope creep.
-      placeholder: |
-        - Judge0 self-hosting setup (separate ticket)
-        - Frontend wiring (separate ticket)
-    validations:
-      required: false
-
-  - type: textarea
-    id: notes
-    attributes:
-      label: Notes
-      description: Implementation hints, gotchas, links to related issues or docs.
-    validations:
-      required: false

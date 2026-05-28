@@ -15,15 +15,37 @@ docker compose down
 # Stop containers AND delete volumes (wipes DB data — clean slate)
 docker compose down -v
 
-# View logs for a specific container
+# View logs for a specific service
 docker compose logs app
-docker compose logs db
+docker compose logs app-db
+docker compose logs judge0-api
+docker compose logs judge0-worker
+docker compose logs judge0-db
+docker compose logs judge0-redis
 
 # Follow logs in real time
 docker compose logs -f app
 
-# List running containers
-docker ps
+# List running containers (with health status)
+docker compose ps
+```
+
+## Judge0 smoke tests
+
+```bash
+# Replace TOKEN with the value of JUDGE0_AUTH_TOKEN in .env / AUTHN_TOKEN in judge0.env.
+
+# Verify Judge0 API is reachable and auth is wired
+curl -H "X-Auth-Token: TOKEN" http://localhost:2358/about
+
+# List supported languages
+curl -H "X-Auth-Token: TOKEN" http://localhost:2358/languages
+
+# Submit a trivial Python program end-to-end (language_id 71 = Python 3.8.1)
+curl -X POST 'http://localhost:2358/submissions?wait=true&base64_encoded=false' \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: TOKEN" \
+  -d '{"source_code":"print(\"hello\")","language_id":71}'
 ```
 
 ## Dependencies (uv)
@@ -70,7 +92,7 @@ uv run pytest -k "test_login"
 
 ```bash
 # Run seed script (DB container must be running, app container not required)
-DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep uv run python -m app.seeds.seed
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run python -m app.seeds.seed
 ```
 
 ## Linting
@@ -91,7 +113,7 @@ brew install uv     # macOS; see uv docs for other platforms
 uv sync
 
 # Run FastAPI app locally (DB must be running via Docker)
-DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep uv run uvicorn app.main:app --reload
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run uvicorn app.main:app --reload
 ```
 
 ## Git

@@ -16,6 +16,11 @@ Quick version:
 git clone https://github.com/dimitrijekastratovic/prepvault.git
 cd prepvault
 cp .env.example .env
+cp app-db.env.example app-db.env
+cp judge0-db.env.example judge0-db.env
+cp judge0.env.example judge0.env
+# Fill in real secrets in each file. Comments call out values that must match
+# across paired files (e.g. DATABASE_URL ↔ app-db.env, JUDGE0_AUTH_TOKEN ↔ judge0.env).
 docker compose up --build -d
 ```
 

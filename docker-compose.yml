@@ -1,30 +1,105 @@
 services:
-  db:
+  # 1. app-db: PostgreSQL database for the main application.
+  app-db:
     image: postgres:16
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: interview_prep
+    env_file: app-db.env
     volumes:
-      - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - app_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d interview_prep"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app_net
 
-
+  # 2. app: The main application service that depends on the app-db being healthy.
   app:
     build: .
     depends_on:
-      db:
+      app-db:
+        condition: service_healthy
+      judge0-api:
         condition: service_healthy
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://user:password@db:5432/interview_prep
-      SECRET_KEY: ${SECRET_KEY}
+    env_file: .env
+    networks:
+      - app_net
+      - judge0_net
+
+  # 3. judge0-db: PostgreSQL database for Judge0, isolated from the main application database.
+  judge0-db:
+    image: postgres:16
+    env_file: judge0-db.env
+    volumes:
+      - judge0_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - judge0_internal_net
+
+  # 4. judge0-redis: Redis instance for Judge0, isolated from the main application.
+  judge0-redis:
+    image: redis:7-alpine
+    command: sh -c 'redis-server --requirepass "$$REDIS_PASSWORD"'
+    env_file: judge0.env 
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - judge0_internal_net
+
+  # 5. judge0-worker: The Judge0 worker service that also depends on the judge0-db and judge0-redis being healthy, and is isolated from the main application.
+  judge0-worker:
+    image: judge0/judge0:1.13.1
+    command: ["./scripts/workers"]
+    # Required for Judge0's isolate sandbox (Linux cgroups + namespaces).
+    # Known and accepted trade-off — see docs/adr/0003-code-execution.md.
+    privileged: true
+    env_file: judge0.env
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    networks:
+      - judge0_internal_net
+
+  # 6. judge0-api: The Judge0 API service that depends on both the judge0-db and judge0-redis being healthy.
+  judge0-api:
+    image: judge0/judge0:1.13.1
+    ports:
+      - "2358:2358"
+    env_file: judge0.env
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- --header=\"X-Auth-Token: $$AUTHN_TOKEN\" http://localhost:2358/about > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - judge0_net
+      - judge0_internal_net
+
 volumes:
-  db_data:
+  app_db_data:
+  judge0_db_data:
+
+networks:
+  app_net:
+    driver: bridge
+  judge0_net:
+    driver: bridge
+  judge0_internal_net:
+    driver: bridge

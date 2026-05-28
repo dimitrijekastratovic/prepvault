@@ -41,33 +41,31 @@ PrepVault is being built as a production-grade web application demonstrating the
 graph TB
     Client[Browser<br/>Study UI + Playground]
 
-    subgraph "FastAPI Application"
-        Router[HTTP Routers<br/>/api/v1/...]
-        WS[WebSocket Handlers]
-        Service[Service Layer<br/>Business Logic]
-        Repo[Repository Layer<br/>Data Access]
-        Auth[Auth<br/>bcrypt + JWT]
+    subgraph app_net["app_net"]
+        App[FastAPI Application<br/>Routers / WS / Service / Auth]
+        AppDB[(prepvault-postgres<br/>users, problems,<br/>submissions, content)]
     end
 
-    subgraph "Data"
-        DB[(PostgreSQL<br/>users, problems,<br/>submissions, content)]
+    subgraph judge0_net["judge0_net"]
+        Judge0API[judge0-api<br/>HTTP entrypoint]
     end
 
-    subgraph "Execution"
-        Exec[CodeExecutionService<br/>interface]
-        Judge0[Judge0<br/>sandboxed runner]
+    subgraph judge0_internal_net["judge0_internal_net"]
+        Worker[judge0-worker<br/>isolate sandbox]
+        Judge0DB[(judge0-postgres)]
+        Redis[(judge0-redis<br/>queue)]
     end
 
-    Client -->|HTTPS| Router
-    Client -.->|WSS| WS
-    Router --> Service
-    WS --> Service
-    Service --> Repo
-    Service --> Auth
-    Service --> Exec
-    Repo --> DB
-    Exec -.implements.-> Judge0
+    Client -->|HTTPS / WSS| App
+    App --> AppDB
+    App -->|X-Auth-Token| Judge0API
+    Judge0API --> Redis
+    Judge0API --> Judge0DB
+    Worker --> Redis
+    Worker --> Judge0DB
 ```
+
+Three Docker networks enforce trust zones. `app` sits on `app_net` + `judge0_net` only. The Judge0 worker — which runs user-submitted code in an `isolate` sandbox and requires a privileged container — is on `judge0_internal_net` only, so it cannot reach the application database or anything outside Judge0's internals at the network layer. The Judge0 API is the single chokepoint between the app and Judge0's guts. See [ADR-0003](docs/adr/0003-code-execution.md) and [SECURITY.md](SECURITY.md) for the security model.
 
 The `CodeExecutionService` is an abstraction — Judge0 is one implementation. Future implementations (custom sandbox, alternative providers) can be swapped in without changing business logic.
 
@@ -85,11 +83,21 @@ The `CodeExecutionService` is an abstraction — Judge0 is one implementation. F
 ```bash
 git clone https://github.com/dimitrijekastratovic/prepvault.git
 cd prepvault
-cp .env.example .env  # fill in any required secrets
+
+# Copy the four env templates. Each file is a separate trust zone (app secrets,
+# app DB, Judge0 internals, Judge0 DB). Passwords must match across paired files
+# — comments in each file call out which values must agree.
+cp .env.example .env
+cp app-db.env.example app-db.env
+cp judge0-db.env.example judge0-db.env
+cp judge0.env.example judge0.env
+
+# Fill in secrets. Generate keys with: openssl rand -hex 32
+
 docker compose up --build -d
 ```
 
-The app is available at [http://localhost:8000](http://localhost:8000).
+The app is available at [http://localhost:8000](http://localhost:8000) and Judge0's API at [http://localhost:2358](http://localhost:2358) (auth required — `X-Auth-Token` header).
 
 ### Run the playground frontend (dev mode)
 
@@ -104,7 +112,7 @@ The Vite dev server runs on [http://localhost:5173](http://localhost:5173) and p
 ### Seed sample problems
 
 ```bash
-DATABASE_URL=postgresql://user:password@localhost:5432/interview_prep \
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db \
   uv run python -m app.seeds.seed
 ```
 

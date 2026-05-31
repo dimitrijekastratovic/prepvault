@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app.database import get_session
+from app.dependencies import get_session
 from app.models.problem import Problem
 from app.models.problem_topics import ProblemTopic
 from app.models.topic import Topic

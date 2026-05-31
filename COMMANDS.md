@@ -74,7 +74,25 @@ uv run <cmd>
 
 ## Tests
 
+Tests run against a real Postgres instance (the `prepvault_test` database created
+on first boot by `docker/app-db-init/01-create-test-db.sql`). The `app-db`
+container must be running; pytest connects via the published 5432 port on
+localhost.
+
+First-time setup:
+
 ```bash
+cp .env.test.example .env.test
+# Edit .env.test and fill in TEST_DATABASE_URL with the credentials from
+# app-db.env (host stays as localhost — pytest runs on the host, not in compose).
+```
+
+`.env.test` is auto-loaded by pytest-dotenv on startup — no `export` needed.
+
+```bash
+# Make sure the database container is up
+docker compose up -d app-db
+
 # Run all tests
 uv run pytest
 

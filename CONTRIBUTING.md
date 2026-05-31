@@ -19,8 +19,10 @@ cp .env.example .env
 cp app-db.env.example app-db.env
 cp judge0-db.env.example judge0-db.env
 cp judge0.env.example judge0.env
+cp .env.test.example .env.test
 # Fill in real secrets in each file. Comments call out values that must match
-# across paired files (e.g. DATABASE_URL ↔ app-db.env, JUDGE0_AUTH_TOKEN ↔ judge0.env).
+# across paired files (e.g. DATABASE_URL ↔ app-db.env, JUDGE0_AUTH_TOKEN ↔ judge0.env,
+# TEST_DATABASE_URL ↔ app-db.env credentials).
 docker compose up --build -d
 ```
 
@@ -71,12 +73,15 @@ uv lock --upgrade       # refresh uv.lock to newest compatible versions
 
 ## Running tests
 
-```bash
-# Backend tests
-uv run pytest
+Tests run against a real Postgres instance — same engine as production. The
+`app-db` container must be up; pytest connects to the `prepvault_test` database
+on `localhost:5432`. Credentials come from `.env.test` (auto-loaded by
+pytest-dotenv).
 
-# Linting
-uv run ruff check .
+```bash
+docker compose up -d app-db   # if not already running
+uv run pytest                 # backend tests
+uv run ruff check .           # linting
 ```
 
 End-to-end and frontend tests are planned for Phase 5.7 — see [ROADMAP.md](ROADMAP.md).

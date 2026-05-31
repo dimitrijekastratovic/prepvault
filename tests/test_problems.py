@@ -7,8 +7,9 @@ def test_get_problems_returns_empty_list(client):
     assert data == []
 
 
-def test_get_problems_returns_correct_data(client, test_problem):
+def test_get_problems_returns_correct_data(client, session, test_problem):
     add_test_problem(
+        session,
         title=test_problem["title"],
         description=test_problem["description"],
         constraints=test_problem["constraints"],
@@ -34,8 +35,9 @@ def test_get_problems_returns_correct_data(client, test_problem):
     assert problem["topics"] == test_problem["topics"]
     assert problem["test_cases"] == test_problem["test_cases"]
 
-def test_get_problems_with_multiple_problems(client, test_problem, test_problem2):
+def test_get_problems_with_multiple_problems(client, session, test_problem, test_problem2):
     add_test_problem(
+        session,
         title=test_problem["title"],
         description=test_problem["description"],
         constraints=test_problem["constraints"],
@@ -47,6 +49,7 @@ def test_get_problems_with_multiple_problems(client, test_problem, test_problem2
     )
 
     add_test_problem(
+        session,
         title=test_problem2["title"],
         description=test_problem2["description"],
         constraints=test_problem2["constraints"],
@@ -83,8 +86,9 @@ def test_get_problems_with_multiple_problems(client, test_problem, test_problem2
     assert problem2["topics"] == test_problem2["topics"]
     assert problem2["test_cases"] == test_problem2["test_cases"]
 
-def test_get_problems_returns_right_topic_values(client, test_problem):
+def test_get_problems_returns_right_topic_values(client, session, test_problem):
     add_test_problem(
+        session,
         title=test_problem["title"],
         description=test_problem["description"],
         constraints=test_problem["constraints"],
@@ -104,8 +108,9 @@ def test_get_problems_returns_right_topic_values(client, test_problem):
     assert problem["topics"] == test_problem["topics"]
     assert isinstance(problem["topics"], list)
 
-def test_get_problems_id_returns_correct_problem(client, test_problem):
+def test_get_problems_id_returns_correct_problem(client, session, test_problem):
     problem_id = add_test_problem(
+        session,
         title=test_problem["title"],
         description=test_problem["description"],
         constraints=test_problem["constraints"],

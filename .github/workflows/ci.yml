@@ -9,6 +9,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # Postgres service for the test suite. The runner reaches it at localhost:5432.
+    # Credentials and database name only need to exist for the duration of the job;
+    # they are not secrets.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: prepvault
+          POSTGRES_PASSWORD: prepvault
+          POSTGRES_DB: prepvault_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prepvault -d prepvault_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -26,6 +45,8 @@ jobs:
         run: uv run ruff check .
 
       - name: Run tests
+        env:
+          TEST_DATABASE_URL: postgresql://prepvault:prepvault@localhost:5432/prepvault_test
         run: uv run pytest
 
       - name: Build Docker image

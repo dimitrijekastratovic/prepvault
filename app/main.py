@@ -7,7 +7,6 @@ from .routers.auth import router as auth
 from .routers.problems import router as problems
 
 from sqlmodel import SQLModel
-from .database import engine
 from .models.user import User  # noqa: F401
 from .models.problem import Problem  # noqa: F401
 from .models.test_case import ProblemTestCase  # noqa: F401
@@ -17,6 +16,7 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from .database import engine
     SQLModel.metadata.create_all(engine)
     yield
 

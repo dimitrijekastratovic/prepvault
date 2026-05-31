@@ -5,7 +5,7 @@ from jose import jwt
 from datetime import datetime, timezone, timedelta
 
 from sqlmodel import Session, select
-from app.database import get_session
+from app.dependencies import get_session
 from app.models.user import User
 
 ALGORITHM = "HS256"

@@ -1,9 +1,10 @@
 import os
-from sqlmodel import create_engine, Session
+from sqlmodel import create_engine
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@db:5432/app")
-engine = create_engine(DATABASE_URL, echo=True)
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+DATABASE_DEBUG = os.environ.get("DATABASE_DEBUG", "").lower() == "true"
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+if DATABASE_URL == "":
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+engine = create_engine(DATABASE_URL, echo=DATABASE_DEBUG)

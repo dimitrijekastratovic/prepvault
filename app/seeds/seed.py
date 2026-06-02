@@ -1,11 +1,8 @@
 import json
 from sqlmodel import Session, select
-from app.database import engine
+from app.core.db import get_engine
 
-from app.models.problem import Problem
-from app.models.problem_topics import ProblemTopic
-from app.models.topic import Topic
-from app.models.test_case import ProblemTestCase
+from app.problems.models import Problem, ProblemTopic, Topic, ProblemTestCase
 
 path_to_json = "./app/seeds/problems.json"
 
@@ -13,7 +10,7 @@ def seed():
     with open(path_to_json, "r") as f:
         data = json.load(f)
 
-    with Session(engine) as session:
+    with Session(get_engine()) as session:
         for problem_data in data:
             problem = Problem(
                 title=problem_data["title"],

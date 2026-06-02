@@ -2,22 +2,20 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from .routers.content import router as content
-from .routers.auth import router as auth
-from .routers.problems import router as problems
+from .content.router import router as content
+from .auth.router import router as auth
+from .problems.router import router as problems
 
 from sqlmodel import SQLModel
-from .models.user import User  # noqa: F401
-from .models.problem import Problem  # noqa: F401
-from .models.test_case import ProblemTestCase  # noqa: F401
-from .models.topic import Topic  # noqa: F401
-from .models.problem_topics import ProblemTopic  # noqa: F401
+from .auth.models import User  # noqa: F401
+from .problems.models import Problem, Topic, ProblemTopic, ProblemTestCase  # noqa: F401
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from .database import engine
-    SQLModel.metadata.create_all(engine)
+    # TODO(ticket-3): replace create_all with Alembic `upgrade head`.
+    from .core.db import get_engine
+    SQLModel.metadata.create_all(get_engine())
     yield
 
 app = FastAPI(lifespan=lifespan)

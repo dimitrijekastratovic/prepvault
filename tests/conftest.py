@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import create_engine, Session, SQLModel
-from app.dependencies import get_session
+from app.core.db import get_session
 from app.main import app
 from sqlalchemy import event
 import os
@@ -81,10 +81,7 @@ def test_problem2():
     }
 
 def add_test_problem(session, title: str, description: str, constraints: str, difficulty: str, time_limit: int, memory_limit: int, topics: list[str], test_cases: list[dict]) -> int:
-    from app.models.problem import Problem
-    from app.models.topic import Topic
-    from app.models.problem_topics import ProblemTopic
-    from app.models.test_case import ProblemTestCase
+    from app.problems.models import Problem, Topic, ProblemTopic, ProblemTestCase
 
     problem = Problem(
         title=title,

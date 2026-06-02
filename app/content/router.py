@@ -1,6 +1,6 @@
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
-from app.schemas.content import TopicRead, TopicsRead, ArticleRead
+from app.content.schemas import TopicRead, TopicsRead, ArticleRead
 
 router = APIRouter()
 CONTENT_DIR = Path(__file__).parent.parent.parent / "content"
@@ -41,7 +41,7 @@ def get_article(topic: str, article: str):
 
     if not article_path.exists():
         raise HTTPException(status_code=404, detail="Article not found")
-    
+
     content = article_path.read_text(encoding="utf-8")
     article = ArticleRead(content=content)
     return article

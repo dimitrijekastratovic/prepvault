@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app.dependencies import get_session
-from app.models.problem import Problem
-from app.models.problem_topics import ProblemTopic
-from app.models.topic import Topic
-from app.models.test_case import ProblemTestCase
-from app.schemas.problem import ProblemRead
+from app.core.db import get_session
+from app.problems.models import Problem, Topic, ProblemTopic, ProblemTestCase
+from app.problems.schemas import ProblemRead
 
 router = APIRouter()
 
@@ -41,7 +38,7 @@ def get_problems(session: Session = Depends(get_session)):
     for problem in problems:
         problem_read = create_problem_read(problem, session)
         result.append(problem_read)
-        
+
     return result
 
 @router.get("/problems/{problem_id}", response_model=ProblemRead)

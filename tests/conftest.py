@@ -10,6 +10,10 @@ from alembic.config import Config
 
 from tests.config import settings
 
+@pytest.fixture
+def client(session):
+    return TestClient(app)
+
 @pytest.fixture(scope="session")
 def engine():
     if settings.test_database_url is None:
@@ -85,6 +89,65 @@ def test_problem2():
         "test_cases": [{"input": "6\n7 8 9\n10", "expected_output": "2 3"}]
     }
 
+@pytest.fixture
+def user_id(session, test_user) -> int:
+    return add_test_user(
+        session,
+        first_name=test_user["first_name"],
+        last_name=test_user["last_name"],
+        email=test_user["email"],
+        password_hash=test_user["password"],
+    )
+
+@pytest.fixture
+def problem_id(session, test_problem) -> int:
+    return add_test_problem(
+        session,
+        title=test_problem["title"],
+        description=test_problem["description"],
+        constraints=test_problem["constraints"],
+        difficulty=test_problem["difficulty"],
+        time_limit=test_problem["time_limit"],
+        memory_limit=test_problem["memory_limit"],
+        topics=test_problem["topics"],
+        test_cases=test_problem["test_cases"],
+    )
+
+@pytest.fixture
+def idempotency_key() -> str:
+    return "test-idempotency-key"
+
+@pytest.fixture
+def test_submission(user_id, problem_id, idempotency_key):
+    return {
+        "user_id": user_id,
+        "problem_id": problem_id,
+        "code": "print('Hello, World!')",
+        "language": "python",
+        "status": "pending",
+        "judge0_token": None,
+        "stdout": None,
+        "stderr": None,
+        "compile_output": None,
+        "runtime_ms": None,
+        "memory_kb": None,
+        "idempotency_key": idempotency_key
+    }
+
+def add_test_user(session, first_name: str, last_name: str, email: str, password_hash: str) -> int:
+    from app.auth.models import User
+
+    user = User(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password_hash=password_hash
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user.id
+
 def add_test_problem(session, title: str, description: str, constraints: str, difficulty: str, time_limit: int, memory_limit: int, topics: list[str], test_cases: list[dict]) -> int:
     from app.problems.models import Problem, Topic, ProblemTopic, ProblemTestCase
 
@@ -119,6 +182,24 @@ def add_test_problem(session, title: str, description: str, constraints: str, di
         session.refresh(problem_test_case)
     return problem.id
 
-@pytest.fixture
-def client(session):
-    return TestClient(app)
+def add_test_submission(session, user_id: int, problem_id: int, code: str, language: str, status: str, judge0_token: str | None, stdout: str | None, stderr: str | None, compile_output: str | None, runtime_ms: int | None, memory_kb: int | None, idempotency_key: str | None) -> int:
+    from app.submissions.models import Submission
+
+    submission = Submission(
+        user_id=user_id,
+        problem_id=problem_id,
+        code=code,
+        language=language,
+        status=status,
+        judge0_token=judge0_token,
+        stdout=stdout,
+        stderr=stderr,
+        compile_output=compile_output,
+        runtime_ms=runtime_ms,
+        memory_kb=memory_kb,
+        idempotency_key=idempotency_key
+    )
+    session.add(submission)
+    session.commit()
+    session.refresh(submission)
+    return submission.id

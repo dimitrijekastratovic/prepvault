@@ -88,6 +88,47 @@ End-to-end and frontend tests are planned for Phase 5.7 — see [ROADMAP.md](ROA
 
 ---
 
+## Database migrations
+
+The schema is managed with [Alembic](https://alembic.sqlalchemy.org/). The app
+does **not** create tables on startup — schema changes are applied out-of-band
+by running `alembic upgrade head`. (Startup `create_all` was deliberately
+removed: in a multi-replica deployment sharing one database, every replica would
+race to build the schema. Migrations are a single, explicit, ordered step
+instead.) The command reference lives in
+[COMMANDS.md](COMMANDS.md#database-migrations-alembic).
+
+When you change a model, the workflow is:
+
+1. **Edit the model** under the relevant feature package (e.g. `app/submissions/models.py`).
+2. **Register it** in `app/core/models_registry.py` if it's a new model. Both
+   Alembic's `env.py` and the test harness import this module so
+   `SQLModel.metadata` is fully populated — a model that isn't imported here is
+   invisible to autogenerate and will be silently skipped.
+3. **Autogenerate a migration**: `alembic revision --autogenerate -m "..."`.
+4. **Read the generated file by hand.** Autogenerate is a *hint, not a
+   contract.* It infers intent from a metadata diff and regularly gets things
+   wrong or incomplete. Never commit a migration you haven't read.
+5. **Apply it**: `alembic upgrade head`, then confirm the result (`\d <table>`
+   in psql, or `alembic upgrade head --sql` to inspect the raw DDL).
+6. **Verify it round-trips**: `alembic downgrade -1` then `alembic upgrade head`
+   should both succeed and leave no orphaned objects.
+
+### Things autogenerate gets wrong
+
+- **Native PostgreSQL enums.** Autogenerate does not emit the `CREATE TYPE` /
+  `DROP TYPE` for a native enum, and it does not make the enum reusable across
+  up/down runs. You must hand-edit the migration to create and drop the type
+  explicitly. Note that `create_type=False` only works on `postgresql.ENUM`, not
+  on `sa.Enum` — using the wrong one leaves orphaned types that break a
+  re-`upgrade` after a `downgrade`.
+- **`server_default` and other column defaults** are frequently missed or
+  rendered as plain Python values — verify they appear in the DDL.
+- **Index predicates** (e.g. partial unique indexes with a `WHERE` clause) may
+  not be reproduced faithfully — check them against the model.
+
+---
+
 ## Architecture decisions
 
 Non-trivial decisions get an [ADR](docs/adr/) before implementation. Use the ADR issue template to draft the decision, then commit the markdown file under `docs/adr/NNNN-slug.md`.

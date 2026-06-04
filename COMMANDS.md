@@ -106,6 +106,38 @@ uv run pytest -v
 uv run pytest -k "test_login"
 ```
 
+## Database Migrations (Alembic)
+
+Schema is managed by [Alembic](https://alembic.sqlalchemy.org/) and applied
+**explicitly** — the app does *not* create tables on startup. After cloning or
+pulling, run `alembic upgrade head` before starting the app so the schema is
+current. See [CONTRIBUTING.md](CONTRIBUTING.md#database-migrations) for the
+authoring workflow and gotchas.
+
+Alembic reads the database URL from `DATABASE_URL` (via `app.core.config`), so
+every command needs that prefix when run from the host. The DB container must be
+running; the app container is not required.
+
+```bash
+# Apply all pending migrations (run after pulling, before starting the app)
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic upgrade head
+
+# Roll back the most recent migration
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic downgrade -1
+
+# Generate a migration after changing a model — ALWAYS review the output by hand
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic revision --autogenerate -m "add X table"
+
+# Show the migration history (oldest → newest)
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic history
+
+# Show the revision currently applied to the database
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic current
+
+# Render pending migrations to raw SQL without executing them (review the DDL)
+DATABASE_URL=postgresql://app_admin_user:app_admin_password123@localhost:5432/prepvault_db uv run alembic upgrade head --sql
+```
+
 ## Seeding the Database
 
 ```bash

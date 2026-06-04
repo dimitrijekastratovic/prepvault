@@ -1,21 +1,26 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import create_engine, Session, SQLModel
+from sqlmodel import create_engine, Session
 from app.core.db import get_session
 from app.main import app
 from sqlalchemy import event
-import os
 
-TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "")
-DATABASE_DEBUG = os.environ.get("DATABASE_DEBUG", "").lower() == "true"
+from alembic import command
+from alembic.config import Config
 
-if TEST_DATABASE_URL == "":
-    raise ValueError("TEST_DATABASE_URL environment variable is not set")
+from tests.config import settings
 
 @pytest.fixture(scope="session")
 def engine():
-    engine = create_engine(TEST_DATABASE_URL, echo=DATABASE_DEBUG)
-    SQLModel.metadata.create_all(engine)
+    if settings.test_database_url is None:
+        raise ValueError("TEST_DATABASE_URL environment variable is not set")
+    engine = create_engine(settings.test_database_url, echo=settings.database_debug)
+
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.test_database_url)
+    command.downgrade(alembic_cfg, "base")
+    command.upgrade(alembic_cfg, "head")
+
     yield engine
     engine.dispose()
 

@@ -4,6 +4,7 @@ from typing import Optional
 from enum import Enum
 import sqlalchemy as sa
 
+
 class SubmissionStatus(str, Enum):
     pending = "pending"
     accepted = "accepted"

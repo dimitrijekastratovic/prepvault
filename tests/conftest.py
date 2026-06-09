@@ -10,6 +10,12 @@ from alembic.config import Config
 
 from tests.config import settings
 
+@pytest.fixture(scope="session")
+def anyio_backend():
+    # Pin anyio's pytest plugin to asyncio (we don't use trio). Required for any
+    # `@pytest.mark.anyio` async test to run.
+    return "asyncio"
+
 @pytest.fixture
 def client(session):
     return TestClient(app)

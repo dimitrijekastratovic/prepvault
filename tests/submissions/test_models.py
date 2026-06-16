@@ -3,7 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import insert, select
 
 from app.submissions.models import Submission, SubmissionStatus
-from tests.conftest import add_test_submission, add_test_user
+from tests.conftest import add_test_user
+from tests.submissions.conftest import add_test_submission
 
 def test_add_submission_to_database(session, user_id, problem_id):
     submission_id = add_test_submission(

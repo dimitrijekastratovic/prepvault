@@ -3,15 +3,15 @@ from sqlmodel import Session
 from app.auth.models import User
 from app.auth.service import get_current_user
 from app.core.db import get_session
-from app.submissions.exceptions import SubmissionConflict, ProblemNotFound
+from app.submissions.exceptions import SubmissionConflict, ProblemNotFound, SubmissionNotFound, SubmissionForbidden
 from app.submissions.execution.judge0 import get_code_execution_service
 from app.submissions.schemas import SubmissionCreate, SubmissionRead
-from app.submissions.service import create_submission
+from app.submissions.service import create_submission, get_submission_by_id
 from app.submissions.execution.base import CodeExecutionService
 
 router = APIRouter()
 
-@router.post("/submissions", 
+@router.post("/submissions",
              response_model=SubmissionRead,
              status_code=status.HTTP_201_CREATED)
 async def submit(payload: SubmissionCreate,
@@ -36,3 +36,21 @@ async def submit(payload: SubmissionCreate,
         response.status_code = status.HTTP_200_OK
     return submission
 
+
+@router.get("/submissions/{submission_id}",
+            response_model=SubmissionRead,
+            status_code=status.HTTP_200_OK)
+def get_submission(submission_id: int,
+                   current_user: User = Depends(get_current_user),
+                   session: Session = Depends(get_session)):
+    
+    try:
+        submission = get_submission_by_id(submission_id=submission_id,
+                                          user_id=current_user.id,
+                                          session=session)    
+    except SubmissionNotFound as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except SubmissionForbidden as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    
+    return submission

@@ -30,9 +30,13 @@ async def create_submission(user: User,
     if not existing_problem:
         raise ProblemNotFound(payload.problem_id)
 
-    submission = Submission.model_validate(payload)
-    submission.user_id = user.id
-    submission.idempotency_key = idempotency_key
+    submission = Submission(
+        problem_id=payload.problem_id,
+        code=payload.code,
+        language=payload.language,
+        user_id=user.id,
+        idempotency_key=idempotency_key,
+    )
 
     try:
         session.add(submission)
@@ -59,5 +63,3 @@ async def create_submission(user: User,
     session.refresh(submission)
 
     return SubmissionRead.model_validate(submission), True
-        
-        

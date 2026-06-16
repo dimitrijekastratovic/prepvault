@@ -119,27 +119,6 @@ def problem_id(session, test_problem) -> int:
         test_cases=test_problem["test_cases"],
     )
 
-@pytest.fixture
-def idempotency_key() -> str:
-    return "test-idempotency-key"
-
-@pytest.fixture
-def test_submission(user_id, problem_id, idempotency_key):
-    return {
-        "user_id": user_id,
-        "problem_id": problem_id,
-        "code": "print('Hello, World!')",
-        "language": "python",
-        "status": "pending",
-        "judge0_token": None,
-        "stdout": None,
-        "stderr": None,
-        "compile_output": None,
-        "runtime_ms": None,
-        "memory_kb": None,
-        "idempotency_key": idempotency_key
-    }
-
 def add_test_user(session, first_name: str, last_name: str, email: str, password_hash: str) -> int:
     from app.auth.models import User
 
@@ -188,24 +167,3 @@ def add_test_problem(session, title: str, description: str, constraints: str, di
         session.refresh(problem_test_case)
     return problem.id
 
-def add_test_submission(session, user_id: int, problem_id: int, code: str, language: str, status: str, judge0_token: str | None, stdout: str | None, stderr: str | None, compile_output: str | None, runtime_ms: int | None, memory_kb: int | None, idempotency_key: str | None) -> int:
-    from app.submissions.models import Submission
-
-    submission = Submission(
-        user_id=user_id,
-        problem_id=problem_id,
-        code=code,
-        language=language,
-        status=status,
-        judge0_token=judge0_token,
-        stdout=stdout,
-        stderr=stderr,
-        compile_output=compile_output,
-        runtime_ms=runtime_ms,
-        memory_kb=memory_kb,
-        idempotency_key=idempotency_key
-    )
-    session.add(submission)
-    session.commit()
-    session.refresh(submission)
-    return submission.id

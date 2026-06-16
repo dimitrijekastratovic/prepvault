@@ -32,9 +32,7 @@ async def submit(payload: SubmissionCreate,
     except SubmissionConflict:
         raise HTTPException(status_code=409, detail="Submission with the same idempotency key already exists")
     
-    if created:
-        response.status_code = status.HTTP_201_CREATED
-        return submission
-    
-    response.status_code = status.HTTP_200_OK
+    if not created:
+        response.status_code = status.HTTP_200_OK
     return submission
+

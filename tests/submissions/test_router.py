@@ -1,4 +1,6 @@
 from app.submissions.models import SubmissionStatus
+from tests.conftest import add_test_user
+from tests.submissions.conftest import add_test_submission
 
 
 def test_submissions_return_201_submission_created(client, submission_payload, idempotency_key):
@@ -89,3 +91,50 @@ def test_submissions_return_422_when_body_malformed(client, idempotency_key):
 ## Not sure if this is possible to test
 #def test_submissionreturn_409_when_submission_conflict():
 #    raise NotImplemented
+
+def test_get_submission_returns_200_for_owner(client, submission_id):
+    response = client.get(f"/api/submissions/{submission_id}")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == submission_id
+    assert body["status"] == "accepted"
+
+    
+def test_get_submission_returns_404_when_not_found(client, submission_id):
+    response = client.get(f"/api/submissions/{submission_id + 1}")
+
+    assert response.status_code == 404
+
+def test_get_submission_returns_403_for_other_user(client, session, problem_id):
+    other_user_id = add_test_user(
+        session,
+        first_name="Other",
+        last_name="User",
+        email="other@example.com",
+        password_hash="otherpassword123",
+    )
+    other_submission_id = add_test_submission(
+        session,
+        user_id=other_user_id,
+        problem_id=problem_id,
+        code="print(2)",
+        language="python",
+        status=SubmissionStatus.accepted,
+        judge0_token="other-token",
+        stdout="",
+        stderr="",
+        compile_output="",
+        runtime_ms=0,
+        memory_kb=0,
+        idempotency_key="other-idempotency-key",
+    )
+
+    response = client.get(f"/api/submissions/{other_submission_id}")
+
+    assert response.status_code == 403
+
+def test_get_submission_returns_401_when_unauthenticated(unauthenticated_client, submission_id):
+    response = unauthenticated_client.get(f"/api/submissions/{submission_id}")
+
+    assert response.status_code == 401

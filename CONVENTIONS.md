@@ -44,8 +44,9 @@ Endpoints that **create** a resource declare `status_code=201` on the route deco
 
 ## Tests
 
-- **One test file per feature**, named to match the package: `tests/<feature>/` or `test_<feature>.py` — and the name is **plural to match the module** (`submissions` → `test_submissions...`, not `test_submission`).
-- Don't split by concern (no `test_<feature>_endpoint.py` + `test_<feature>_service.py`); keep the feature's tests together. A feature-local `conftest.py` holds its fixtures (`submissions` is the reference).
+- **Central `tests/` directory mirroring the feature packages** (`tests/<feature>/`), not test files colocated under `app/<feature>/`. This keeps tests trivially excludable from the shipped Docker image and lets a single top-level harness (`tests/conftest.py`) be shared.
+- The test directory is named **plural to match the module** (`submissions` → `tests/submissions/`).
+- **Split test files by concern within the feature, mirroring the source**: `test_router.py` (endpoints via `TestClient` + `dependency_overrides`), `test_service.py` (logic with a session + fakes, no HTTP), `test_models.py` (DB/ORM behavior), plus others as the feature needs (e.g. `test_websocket.py`). Rationale: router and model tests don't share dependencies, so they don't share a file. A feature-local `conftest.py` holds its fixtures (`submissions/` is the reference).
 - **Test naming:**
   - Endpoint/behavior tests: `test_<subject>_<verb>_<result>_when_<condition>` — e.g. `test_get_submission_returns_403_for_other_user`, `test_websocket_closes_4403_when_submission_belongs_to_other_user`.
   - Pure-function unit tests: `test_<fn>_should_<behavior>` — e.g. `test_map_status_should_translate_status_ids_to_submission_statuses`.

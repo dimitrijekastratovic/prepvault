@@ -24,7 +24,7 @@ def test_submissions_return_201_submission_created(client, submission_payload, i
     assert body["memory_kb"] == 1024
 
 
-def test_submissions_return_401_when_cookie_not_provided(unauthenticated_client, submission_payload, idempotency_key):
+def test_submissions_return_401_when_client_unauthenticated(unauthenticated_client, submission_payload, idempotency_key):
     response = unauthenticated_client.post(
         "/api/submissions",
         json=submission_payload,
@@ -134,7 +134,7 @@ def test_get_submission_returns_403_for_other_user(client, session, problem_id):
 
     assert response.status_code == 403
 
-def test_get_submission_returns_401_when_unauthenticated(unauthenticated_client, submission_id):
+def test_get_submission_returns_401_when_client_unauthenticated(unauthenticated_client, submission_id):
     response = unauthenticated_client.get(f"/api/submissions/{submission_id}")
 
     assert response.status_code == 401

@@ -6,12 +6,14 @@ from .content.router import router as content
 from .auth.router import router as auth
 from .problems.router import router as problems
 from .submissions.router import router as submissions
+from .submissions.websocket import router as submissions_ws
 
 app = FastAPI()
 app.include_router(content)
 app.include_router(auth, prefix="/auth")
 app.include_router(problems, prefix="/api")
 app.include_router(submissions, prefix="/api")
+app.include_router(submissions_ws, prefix="/api")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.get("/health")

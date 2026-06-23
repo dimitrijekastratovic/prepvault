@@ -28,18 +28,21 @@ def verify_access_token(token: str):
     except jwt.JWTError:
         return None
 
-def get_current_user(request: Request, session: Session = Depends(get_session)):
-    token = request.cookies.get("token")
+def get_user_from_token(token: str | None, session: Session) -> User | None:
     if token is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
+        return None
+
     payload = verify_access_token(token)
     if payload is None:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
+        return None
+
     user_id = payload.get("sub")
-    user = session.exec(select(User).where(User.id == user_id)).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    
+    return session.exec(select(User).where(User.id == user_id)).first()
+
+
+def get_current_user(request: Request, session: Session = Depends(get_session)):
+    user = get_user_from_token(request.cookies.get("token"), session)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     return user

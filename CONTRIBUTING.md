@@ -133,6 +133,10 @@ When you change a model, the workflow is:
 
 Non-trivial decisions get an [ADR](docs/adr/) before implementation. Use the ADR issue template to draft the decision, then commit the markdown file under `docs/adr/NNNN-slug.md`.
 
+## Feature-module conventions
+
+How a feature module is structured (files, error handling, read serialization, status codes, test layout) is documented in [CONVENTIONS.md](CONVENTIONS.md). Match `app/submissions/` — the reference module — when adding or changing a feature.
+
 ---
 
 ## Reporting issues

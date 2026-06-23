@@ -26,5 +26,6 @@ Target one screen of rendered markdown. ADRs are numbered sequentially (`0001`, 
 | [0003](0003-code-execution.md) | Self-hosted Judge0 for code execution |
 | [0004](0004-alembic-migrations.md) | Adopt Alembic for database migrations |
 | [0005](0005-feature-modular-layout.md) | Feature-modular application layout |
+| [0006](0006-feature-module-conventions.md) | Codify feature-module conventions |
 
 ADRs are added as decisions are made — see [ROADMAP.md](../../ROADMAP.md) for upcoming phases that will require ADRs.

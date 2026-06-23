@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.auth.models import User
-from app.auth.service import get_current_user
+from app.auth.service import get_current_user, create_access_token
 from app.main import app
 from app.submissions.execution.base import CodeExecutionService, ExecutionResult
 from app.submissions.execution.judge0 import get_code_execution_service
@@ -17,6 +17,11 @@ FAKE_RESULT = ExecutionResult(
     memory_kb=1024,
     provider_token="fake-token-123",
 )
+
+
+@pytest.fixture
+def auth_token(auth_user) -> str:
+    return create_access_token({"sub": str(auth_user.id)})
 
 
 class FakeExecutionService(CodeExecutionService):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from app.core.db import get_session
@@ -31,7 +31,9 @@ def create_problem_read(problem: Problem, session: Session) -> ProblemRead:
         test_cases=problem_test_cases
     )
 
-@router.get("/problems", response_model=list[ProblemRead])
+@router.get("/problems", 
+            response_model=list[ProblemRead],
+            status_code=status.HTTP_200_OK)
 def get_problems(session: Session = Depends(get_session)):
     problems = session.exec(select(Problem)).all()
     result = []
@@ -41,7 +43,9 @@ def get_problems(session: Session = Depends(get_session)):
 
     return result
 
-@router.get("/problems/{problem_id}", response_model=ProblemRead)
+@router.get("/problems/{problem_id}", 
+            response_model=ProblemRead,
+            status_code=status.HTTP_200_OK)
 def get_problem(problem_id: int, session: Session = Depends(get_session)):
     problem = session.get(Problem, problem_id)
     if not problem:

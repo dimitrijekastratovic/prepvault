@@ -40,7 +40,7 @@ Reference: `submissions/service.py` raises `SubmissionNotFound` / `SubmissionFor
 
 ## Success status codes
 
-Endpoints that **create** a resource declare `status_code=201` on the route decorator (so OpenAPI documents it correctly), even when a replay/idempotent path returns 200. Don't let a creating endpoint silently return the default 200.
+All endpoints should declare an explicit status_code on the route decorator - never rely on the framework default. This documents the contract in the OpenAPI and acts as a regression guard if a return value changes. Endpoints that **create** a resource use 201, even when an idempotent replay path returns 200.
 
 ## Tests
 

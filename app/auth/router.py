@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session, select
 from app.core.db import get_session
 from app.auth.models import User
@@ -7,11 +7,14 @@ from app.auth.service import hash_password, verify_password, create_access_token
 
 router = APIRouter()
 
-@router.get("/me", response_model=UserRead)
+@router.get("/me", 
+            response_model=UserRead,
+            status_code=status.HTTP_200_OK)
 def authenticate_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.post("/login")
+@router.post("/login",
+             status_code=status.HTTP_200_OK)
 def login(user: UserLogin, response: Response, session: Session = Depends(get_session)):
     user_exists = session.exec(select(User).where(User.email == user.email)).first()
     if not user_exists:
@@ -25,12 +28,15 @@ def login(user: UserLogin, response: Response, session: Session = Depends(get_se
     response.set_cookie(key="token", value=jwt_token, httponly=True)
     return {"message": "Login successful"}
 
-@router.post("/logout")
+@router.post("/logout",
+             status_code=status.HTTP_200_OK)
 def logout(response: Response):
     response.delete_cookie(key="token")
     return {"message": "Logout successful"}
 
-@router.post("/register", response_model=UserRead)
+@router.post("/register", 
+             response_model=UserRead,
+             status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, session: Session = Depends(get_session)):
     existing_user = session.exec(select(User).where(User.email == user.email)).first()
     if existing_user:

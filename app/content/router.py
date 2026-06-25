@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from app.content.schemas import TopicRead, TopicsRead, ArticleRead
 
 router = APIRouter()
@@ -19,7 +19,9 @@ ARTICLE_ORDER = {
     "system-design": ["scalability"],
 }
 
-@router.get("/topics", response_model=TopicsRead)
+@router.get("/topics", 
+            response_model=TopicsRead,
+            status_code=status.HTTP_200_OK)
 def get_topics():
     topics_read = TopicsRead(topics=[])
     for topic in TOPIC_ORDER:
@@ -35,7 +37,9 @@ def get_topics():
         topics_read.topics.append(topic_read)
     return topics_read
 
-@router.get("/topics/{topic}/{article}", response_model=ArticleRead)
+@router.get("/topics/{topic}/{article}", 
+            response_model=ArticleRead,
+            status_code=status.HTTP_200_OK)
 def get_article(topic: str, article: str):
     article_path = CONTENT_DIR / topic / f"{article}.md"
 

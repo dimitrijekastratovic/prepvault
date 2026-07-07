@@ -1,7 +1,7 @@
 # Production image for PrepVault FastAPI backend.
 # Dependencies are managed by uv — see docs/adr/0002-dependency-management-with-uv.md.
 
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Install uv by copying its binary from the official distroless image.
 # This avoids needing curl/pip on the runtime image and gives us a pinned uv version.

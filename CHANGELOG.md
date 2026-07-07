@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - CD workflow image name corrected from `nonamerepo` to `prepvault`.
-- Python version changed from 3.10 to 3.12
+- Python version changed from 3.10 to 3.12 per ADR-0001
 
 ---
 

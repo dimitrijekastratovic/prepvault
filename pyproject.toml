@@ -1,7 +1,7 @@
 [project]
 name = "prepvault"
 version = "0.1.0"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "bcrypt>=5.0.0",
     "fastapi>=0.138.1",
